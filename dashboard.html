@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Frontdesk | Practice Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="app.css">
+<style>
+  .dash-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    flex-wrap: wrap;
+    gap: 16px;
+    margin-bottom: 30px;
+  }
+  .clinic-tag {
+    background: var(--teal);
+    color: white;
+    font-size: 12px;
+    font-weight: 700;
+    padding: 8px 14px;
+    border-radius: 8px;
+  }
+
+  .kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    margin-bottom: 26px;
+  }
+  @media (max-width: 800px) { .kpi-grid { grid-template-columns: repeat(2, 1fr); } }
+
+  .kpi {
+    padding: 20px 22px;
+  }
+  .kpi .num { font-family: "Playfair Display", serif; font-size: 32px; color: var(--teal); }
+  .kpi .lbl { color: var(--muted); font-size: 13px; margin-top: 4px; }
+  .kpi .delta { color: var(--green); font-size: 12px; font-weight: 700; margin-left: 6px; }
+
+  .panels {
+    display: grid;
+    grid-template-columns: 1.3fr 1fr;
+    gap: 20px;
+    align-items: start;
+  }
+  @media (max-width: 950px) { .panels { grid-template-columns: 1fr; } }
+
+  .panel { padding: 22px 24px; }
+  .panel h3 { color: var(--teal); font-size: 16px; margin-bottom: 16px; }
+
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th { text-align: left; color: var(--muted); font-weight: 600; padding: 8px 6px; border-bottom: 1px solid var(--border); font-size: 12px; }
+  td { padding: 10px 6px; border-bottom: 1px solid #f0f0ec; }
+  tr.escalated { background: var(--red-soft); }
+  tr.escalated td:first-child { border-left: 3px solid var(--red); }
+
+  .status-pill {
+    font-size: 11px;
+    font-weight: 700;
+    padding: 4px 9px;
+    border-radius: 50px;
+    display: inline-block;
+  }
+  .status-pill.booked { background: var(--teal-soft); color: var(--teal); }
+  .status-pill.answered { background: #eef4ee; color: var(--green); }
+  .status-pill.escalated { background: #f6d9d1; color: var(--red); }
+
+  .log-item {
+    font-size: 12.5px;
+    padding: 10px 0;
+    border-bottom: 1px solid #f0f0ec;
+  }
+  .log-item:last-child { border-bottom: none; }
+  .log-time { color: var(--muted); margin-right: 8px; }
+  .log-who { font-weight: 700; color: var(--teal); }
+
+  .access-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 18px;
+    padding-top: 16px;
+    border-top: 1px solid var(--border);
+    font-size: 13px;
+  }
+  .access-row .role { color: var(--muted); }
+  .access-actions { display: flex; gap: 8px; }
+
+  .live-dot {
+    width: 7px; height: 7px; border-radius: 50%; background: var(--green);
+    display: inline-block; margin-right: 6px;
+    animation: pulse 1.4s infinite;
+  }
+  @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.35; } }
+</style>
+</head>
+<body>
+
+<nav class="app-nav">
+  <a href="index.html" class="logo"><span class="logo-icon">✓</span> Frontdesk</a>
+  <div class="nav-links">
+    <a href="index.html">Landing Page</a>
+    <a href="app.html">Patient Assistant</a>
+    <a href="dashboard.html" class="active">Practice Dashboard</a>
+  </div>
+</nav>
+
+<div class="app-shell">
+  <span class="app-eyebrow">High-fidelity prototype</span>
+  <div class="dash-top">
+    <div>
+      <h1>Practice Manager Dashboard</h1>
+      <p class="lede" style="margin-bottom:0;">Live visibility over Frontdesk activity, including my individual features: role-based access and activity monitoring for clinic staff, and live sync from the Patient Assistant chat widget when a patient escalates to a human.</p>
+    </div>
+    <span class="clinic-tag">Suburban GP Clinic</span>
+  </div>
+
+  <div class="kpi-grid">
+    <div class="card kpi"><div class="num">37</div><div class="lbl">Calls captured today</div></div>
+    <div class="card kpi"><div class="num">6</div><div class="lbl">After-hours bookings</div></div>
+    <div class="card kpi"><div class="num">11% <span class="delta">↓17pts</span></div><div class="lbl">No-show rate (30 days)</div></div>
+    <div class="card kpi"><div class="num">4</div><div class="lbl">Escalated to staff today</div></div>
+  </div>
+
+  <div class="panels">
+    <div class="card panel">
+      <h3><span class="live-dot"></span>Live Intake Queue</h3>
+      <table>
+        <thead>
+          <tr><th>Time</th><th>Channel</th><th>Patient request</th><th>Status</th></tr>
+        </thead>
+        <tbody id="queueBody">
+          <tr><td>9:14am</td><td>Phone</td><td>Reschedule physio appointment</td><td><span class="status-pill booked">Booked ✓</span></td></tr>
+          <tr><td>9:20am</td><td>Chat</td><td>Ask about bulk billing</td><td><span class="status-pill answered">Answered ✓</span></td></tr>
+          <tr class="escalated"><td>9:31am</td><td>Phone</td><td>Chest pain, feeling unwell</td><td><span class="status-pill escalated">Escalated ⚠</span></td></tr>
+          <tr><td>9:47am</td><td>Chat</td><td>Prescription refill request</td><td><span class="status-pill booked">Booked ✓</span></td></tr>
+          <tr><td>10:02am</td><td>Phone</td><td>After-hours voicemail — new patient</td><td><span class="status-pill booked">Booked ✓</span></td></tr>
+        </tbody>
+      </table>
+      <button class="btn btn-ghost btn-sm" id="simulateBtn" style="margin-top:16px;">Simulate new interaction</button>
+    </div>
+
+    <div class="card panel">
+      <h3>Activity Log</h3>
+      <div id="syncNote" style="display:none;" class="sync-badge">● Synced from Patient Assistant</div>
+      <div id="logList">
+        <div class="log-item"><span class="log-time">10:41</span><span class="log-who">Receptionist</span> — Booking updated — Patient #1024</div>
+        <div class="log-item"><span class="log-time">10:39</span><span class="log-who">Staff member</span> — Patient interaction accessed — Patient #1018</div>
+        <div class="log-item"><span class="log-time">10:35</span><span class="log-who">Receptionist</span> — Escalation accepted — Patient #1021</div>
+      </div>
+      <div class="access-row">
+        <span class="role">Role: Practice Manager</span>
+        <div class="access-actions">
+          <button class="btn btn-ghost btn-sm" id="viewActivityBtn">View staff activity</button>
+          <button class="btn btn-ghost btn-sm" id="manageAccessBtn">Manage access</button>
+        </div>
+      </div>
+      <div class="access-panel" id="activityPanel">
+        <p style="color:var(--muted); margin-bottom:8px;">Full staff activity (last 24h):</p>
+        <div class="log-item"><span class="log-time">08:52</span><span class="log-who">Receptionist</span> — Logged in</div>
+        <div class="log-item"><span class="log-time">09:14</span><span class="log-who">Receptionist</span> — Booking created — Patient #1002</div>
+        <div class="log-item"><span class="log-time">09:31</span><span class="log-who">System</span> — Escalation flagged — Patient #1006</div>
+        <div class="log-item"><span class="log-time">09:33</span><span class="log-who">Clinician</span> — Escalation reviewed — Patient #1006</div>
+        <div class="log-item"><span class="log-time">10:35</span><span class="log-who">Receptionist</span> — Escalation accepted — Patient #1021</div>
+      </div>
+      <div class="access-panel" id="managePanel">
+        <p style="color:var(--muted); margin-bottom:8px;">My individual feature: role-based access control.</p>
+        <table>
+          <thead><tr><th>Role</th><th>Bookings</th><th>Escalations</th><th>Patient chat history</th><th>Dashboard/KPIs</th></tr></thead>
+          <tbody>
+            <tr><td>Practice Manager</td><td class="perm-yes">✓</td><td class="perm-yes">✓</td><td class="perm-yes">✓</td><td class="perm-yes">✓</td></tr>
+            <tr><td>Clinician</td><td class="perm-yes">✓</td><td class="perm-yes">✓</td><td class="perm-yes">✓</td><td class="perm-no">—</td></tr>
+            <tr><td>Receptionist</td><td class="perm-yes">✓</td><td class="perm-yes">✓</td><td class="perm-no">—</td><td class="perm-no">—</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  const queueEvents = [
+    ['Chat', 'Book general consultation', 'booked', 'Booked ✓'],
+    ['Phone', 'Cancel appointment', 'booked', 'Booked ✓'],
+    ['Chat', 'Question about parking', 'answered', 'Answered ✓'],
+    ['Phone', 'Severe allergic reaction', 'escalated', 'Escalated ⚠'],
+  ];
+  let i = 0;
+  document.getElementById('simulateBtn').addEventListener('click', () => {
+    const [channel, req, cls, label] = queueEvents[i % queueEvents.length];
+    i++;
+    const now = new Date();
+    const time = now.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' }).toLowerCase().replace(' ', '');
+    const tbody = document.getElementById('queueBody');
+    const row = document.createElement('tr');
+    if (cls === 'escalated') row.className = 'escalated';
+    row.innerHTML = `<td>${time}</td><td>${channel}</td><td>${req}</td><td><span class="status-pill ${cls}">${label}</span></td>`;
+    tbody.prepend(row);
+
+    if (cls === 'escalated') {
+      const log = document.getElementById('logList');
+      const entry = document.createElement('div');
+      entry.className = 'log-item';
+      entry.innerHTML = `<span class="log-time">${time}</span><span class="log-who">System</span> — Escalation flagged — awaiting staff`;
+      log.prepend(entry);
+    }
+  });
+
+  // My individual feature: cross-screen sync. On load, pull in any
+  // escalations the patient triggered in app.html (via localStorage) so
+  // this dashboard reflects the same underlying data, not a separate demo.
+  (function loadSyncedEscalations() {
+    try {
+      const key = 'frontdesk_escalations';
+      const events = JSON.parse(localStorage.getItem(key) || '[]');
+      if (!events.length) return;
+      document.getElementById('syncNote').style.display = 'inline-flex';
+      const tbody = document.getElementById('queueBody');
+      const log = document.getElementById('logList');
+      events.forEach(ev => {
+        const row = document.createElement('tr');
+        row.className = 'escalated';
+        row.innerHTML = `<td>${ev.time}</td><td>${ev.channel}</td><td>${ev.request}</td><td><span class="status-pill escalated">Escalated ⚠</span></td>`;
+        tbody.prepend(row);
+
+        const entry = document.createElement('div');
+        entry.className = 'log-item';
+        entry.innerHTML = `<span class="log-time">${ev.time}</span><span class="log-who">System</span> — Escalation flagged from Patient Assistant — awaiting staff`;
+        log.prepend(entry);
+      });
+      localStorage.removeItem(key);
+    } catch (e) {
+      // localStorage unavailable — dashboard still works with its seeded demo data
+    }
+  })();
+
+  document.getElementById('viewActivityBtn').addEventListener('click', () => {
+    document.getElementById('activityPanel').classList.toggle('open');
+    document.getElementById('managePanel').classList.remove('open');
+  });
+  document.getElementById('manageAccessBtn').addEventListener('click', () => {
+    document.getElementById('managePanel').classList.toggle('open');
+    document.getElementById('activityPanel').classList.remove('open');
+  });
+</script>
+</body>
+</html>
